@@ -25,7 +25,6 @@ An analysis pipeline for paired-end MNase-seq data with the following major step
 	- FASTQ filenames are used by the scripts throughout this pipeline, and should easily identify the sample. For example, my filenames usually take the format: strain_treatment_replicate (e.g. 425_93_D_rep1). After demultiplexing, there is usually trailing info added to the filename (e.g. _S3_R1_001.fastq.gz). The S indicates the index number on your sample sheet, R1 and R2 indicate the paired reads from the sequencer, and 001 is a trailing number added for reasons beyond my comprehension.
 - Bowtie2 index files (.bt2) for genome alignment, included for *S. cerevisiae* and *S. pombe* in the `genomes/bowtie2_index/` directory in this repository.
 - BED files to tell deeptools which portions of the genome you would like to plot. I have included the standard non-overlapping ORF BED file from James Chuang in the `genomes/annotations/` directory of this repository.
-- Patience. It will likely take some troubleshooting and path editing in the slurm scripts to analyze your data. My goal is to make this process as pain-free as possible, so I will try to explain how each step functions so that you can debug with confidence.
 
 
 ## instructions
@@ -40,7 +39,7 @@ git clone https://github.com/jamwarner/mnase_seq.git
 cd mnase_seq
 ```
 
-Run all commands from the base `mnase_seq` directory.
+Run all commands from the base `mnase_seq/` directory.
 
 
 **2. Download or transfers your .fastq.gz files into the `fastq/` directory.**
@@ -116,7 +115,7 @@ To be completed.
 
 ```bash
 # use a for loop to submit each coverage job in parallel
-for name in bam/*_sorted.bam; do sbatch scripts bamCoverage_spikein_batch.sh $name; done
+for name in bam/*_sorted.bam; do sbatch scripts bamCoverage_spikein.sh $name; done
 ```
 
 
