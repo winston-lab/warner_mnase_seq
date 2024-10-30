@@ -108,7 +108,47 @@ The lines continue to alternate for each BAM file processed.
 
 **6. Do spike-in normalization math.**
 
-To be completed.
+For spike-in normalization, we will use the *S. pombe* reads to calculate a normalization factor.  Essentially, the normalization factor is a per-library number so that, when scaled by this factor, each library would have the same number of reads aligning to the *S. pombe* genome.
+
+At this point, we need to create a local virtual environment in which to run the custome python script that I've written to generate the normalization values.
+Run the following commands line-by-line:
+
+```bash
+# start an interactive session
+srun --pty -p interactive -t 0-1:00 --mem=1G bash
+
+# load modules
+module load gcc/9.2.0
+
+module load python/3.10.11
+
+# create a local virtual environment
+virtualenv spike_in --system-site-packages
+
+# activate the virtual environment
+source spike_in/bin/activate
+
+# install packages to the virtual environment
+pip3 install numpy
+
+pip3 install pandas
+
+pip3 install matplotlib
+
+# run the python script
+python scripts/mnase_spikein_norm.py
+
+# deactivate the environment
+deactivate
+```
+
+(More on virtual environments on O2 [here](https://harvardmed.atlassian.net/wiki/spaces/O2/pages/1588662166/Personal+Python+Packages).)
+
+The output of all of this is a file called 'normalization_table.csv' in `logs/` that consists of two columns:
+- column 1 is the library name
+- column 2 is the scaling factor that will be used for normalization
+
+This step also generates a plot of the proportion of each library that aligned to either the *S. pombe* or *S. cerevisiae* genome. It's called 'proportion_reads_mapped.png' and can also be found in `logs/`.
 
 
 **7. Generate coverage tracks for each library scaled by spike-in normalization.**

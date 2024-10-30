@@ -13,8 +13,8 @@ module load gcc/9.2.0 samtools/1.15.1
 
 
 for name in bam/*_sorted.bam; do
-	(basename ${name} _sorted.bam) >> logs/counts.log
-	samtools view -c -F 388 ${name} >> logs/counts.log
+	(basename ${name} _sorted.bam) >> logs/experimental_counts.log
+	samtools view -c -F 388 ${name} >> logs/experimental_counts.log
 done
 
 for name in bam/spike_in/*_sorted.bam; do
