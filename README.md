@@ -177,7 +177,7 @@ This script takes the above binned coverage scores, calculates the Pearson's and
 
 **9. Generate matrices to plot data.**
 
-Using the coverage (.bw) files, generate matrices with which to plot the data. The default BED file lines all non-overlapping protein-coding genes up according to their +1 nucleosome. Plotting data is generated for 500 bp upstream and 1500 bp downstream of this position.
+Using the coverage (.bw) files, generate matrices with which to plot the data. The default BED file lines 3,087 non-overlapping protein-coding genes up according to their +1 nucleosome. Plotting data is generated for 500 bp upstream and 1500 bp downstream of this position.
 
 ```bash
 # use a for loop to submit each replicate in parallel
