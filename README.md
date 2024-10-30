@@ -155,7 +155,7 @@ This step also generates a plot of the proportion of each library that aligned t
 
 ```bash
 # use a for loop to submit each coverage job in parallel
-for name in bam/*_sorted.bam; do sbatch scripts bamCoverage_spikein.sh $name; done
+for name in bam/*_sorted.bam; do sbatch scripts/bamCoverage_spikein.sh $name; done
 ```
 
 

@@ -3,7 +3,7 @@
 #SBATCH --partition=short                      # Partition to run in
 #SBATCH -c 4                                 # Requested cores
 #SBATCH --time=0-00:30                    # Runtime in D-HH:MM format
-#SBATCH --mem=2GB                           # Requested Memory
+#SBATCH --mem=750M                           # Requested Memory
 #SBATCH -o %j.out                            # File to which STDOUT will be written, including job ID (%j)
 #SBATCH -e %j.err                            # File to which STDERR will be written, including job ID (%j)
 #SBATCH --mail-type=ALL                      # ALL email notification type

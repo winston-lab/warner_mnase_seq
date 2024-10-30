@@ -2,7 +2,7 @@
 
 #SBATCH --partition=short                      # Partition to run in
 #SBATCH -c 4                                 # Requested cores
-#SBATCH --time=0-00:30                   # Runtime in D-HH:MM format
+#SBATCH --time=0-00:10                   # Runtime in D-HH:MM format
 #SBATCH --mem=300M                           # Requested Memory
 #SBATCH -o %j.out                            # File to which STDOUT will be written, including job ID (%j)
 #SBATCH -e %j.err                            # File to which STDERR will be written, including job ID (%j)
@@ -19,5 +19,5 @@ computeMatrix reference-point -S deeptools/*${1%}*.bw -R genome/annotations/Scer
 	-bs 10 \
 	-p max \
 	--averageTypeBins mean \
-	--outFileNameMatrix spike-in_norm/deeptools/tab/${1%}_plusone.tab
+	--outFileNameMatrix deeptools/tab/${1%}_plusone.tab
 	

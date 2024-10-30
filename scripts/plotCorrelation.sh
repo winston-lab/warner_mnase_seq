@@ -16,7 +16,7 @@ module load gcc/6.2.0 python/2.7.12 deeptools/3.0.2
 plotCorrelation -in correlation/scores_per_bin.gz \
 	-c spearman \
 	-p heatmap \
-	-o correlation/spearman.svg \
+	-o correlation/spearman.png \
 	--skipZeros \
 	--plotNumbers \
 	--outFileCorMatrix correlation/spearman.tab
@@ -24,7 +24,7 @@ plotCorrelation -in correlation/scores_per_bin.gz \
 plotCorrelation -in correlation/scores_per_bin.gz \
 	-c pearson \
 	-p heatmap \
-	-o correlation/pearson.svg \
+	-o correlation/pearson.png \
 	--skipZeros \
 	--plotNumbers \
 	--outFileCorMatrix correlation/pearson.tab
