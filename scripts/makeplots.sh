@@ -7,7 +7,7 @@
 #SBATCH -o %j.out                            # File to which STDOUT will be written, including job ID (%j)
 #SBATCH -e %j.err                            # File to which STDERR will be written, including job ID (%j)
 #SBATCH --mail-type=ALL                      # ALL email notification type
-#SBATCH --mail-user=james_warner@hms.harvard.edu          # Email to which notifications will be sent
+#SBATCH --mail-user=<your_email_here>          # Email to which notifications will be sent
 
 #Use older versions to avoid incompatibility with python 'dpp_inches'
 module load gcc/6.2.0 python/2.7.12 deeptools/3.0.2
