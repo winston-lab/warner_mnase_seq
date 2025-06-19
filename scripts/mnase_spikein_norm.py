@@ -68,10 +68,13 @@ aligned_reads[["library", "proportion_spom", "proportion_scer"]].plot(
     kind = 'barh',
     stacked = True,
     figsize = (5,10),
-    legend = False,
-    title = 'Proportion of reads mapped to S. pombe \nor S. cerevisiae genomes',
+    legend = True,
+    title = 'Proportion of reads mapped to\n$\\it{S. pombe}$ or $\\it{S. cerevisiae}$ genomes',
     )
+plt.gca().invert_yaxis()
+plt.tight_layout()
 plt.savefig('logs/proportion_reads_mapped.png', dpi=300)
+plt.show();
 
 ## Change x-axis limit to get a better look at Spom values
 # aligned_reads[["library", "proportion_spom", "proportion_scer"]].plot(
@@ -109,5 +112,8 @@ for i in range(len(aligned_reads['spike-in fold change'])):
 # aligned_reads["spom_counts"]*aligned_reads["spike-in fold change"]
 # aligned_reads["scer_counts"]*aligned_reads["spike-in fold change"]
 
-aligned_reads[["library", "spike-in_norm_float"]].to_csv(path_or_buf='logs/normalization_table.csv', index=False, header=False)
+#check numbers
+aligned_reads[['library','spike-in_norm_float']]
 
+aligned_reads[["library", "spike-in_norm_float"]].to_csv(path_or_buf='logs/normalization_table.csv', index=False, header=False)
+print('Done!')

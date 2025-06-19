@@ -10,14 +10,32 @@
 #SBATCH --mail-user=<your_email_here>          # Email to which notifications will be sent
 
 
-module load gcc/9.2.0 python/3.9.14 deeptools/3.5.0
+module load gcc/9.2.0 python/3.9.14
 
+source env/deeptools/bin/activate
 
-computeMatrix reference-point -S deeptools/*${1%}*.bw -R genome/annotations/Scer_transcripts_w_verifiedORFs_nonoverlapping_WT-37C_plusonenuc.bed -o deeptools/${1%}_plusone.gz \
+for strain in 425 553; do
+
+for plasmid in 414 93 95; do
+
+for cond in D I; do
+
+computeMatrix reference-point -S deeptools/averaged/${strain}_${plasmid}_${cond}_averaged_si.bw -R genome/annotations/Scer_transcripts_w_verifiedORFs-nonoverlapping.bed -o deeptools/averaged/gz/${strain}_${plasmid}_${cond}_averaged_plusone_reference.gz \
 	-b 500 \
-	-a 1500 \
+	-a 4500 \
 	-bs 10 \
 	-p max \
 	--averageTypeBins mean \
-	--outFileNameMatrix deeptools/tab/${1%}_plusone.tab
+	--nanAfterEnd \
+	--sortRegions ascend \
+	--sortUsing region_length \
+	--outFileNameMatrix deeptools/averaged/tab/${strain}_${plasmid}_${cond}_averaged_plusone_reference.tab
+
+done
+
+done
+
+done
+
+deactivate
 	

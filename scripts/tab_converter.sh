@@ -1,0 +1,2 @@
+#to edit Deeptools .tab output files to make them python-readable -- to do to all files in a directory:
+for name in file/path/*.tab; do sed '3s/genes:3087\t/#genes:\n/g' $name > lala.tab && mv lala.tab $name; done

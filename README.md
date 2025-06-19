@@ -41,19 +41,75 @@ cd mnase_seq
 
 Run all commands from the base `mnase_seq/` directory.
 
+**2. Prepare virtual environments**
 
-**2. Download or transfers your .fastq.gz files into the `fastq/` directory.**
+The code written for these analyses relies on two virtual environments `deeptools` and `spike_in` that you will have to set up using `virtualenv` and `pip`. The following commands should be run line-by-line.
+(More on virtual environments on O2 [here](https://harvardmed.atlassian.net/wiki/spaces/O2/pages/1588662166/Personal+Python+Packages).)
+
+```bash
+# start an interactive session
+srun --pty -p interactive -t 0-1:00 --mem=1G bash
+```
+
+To create the `deeptools` environment:
+```bash
+# load modules
+module load gcc/9.2.0
+
+module load python/3.10.11
+
+# create a local virtual environment
+virtualenv env/deeptools --system-site-packages
+
+# activate the virtual environment
+source env/deeptools/bin/activate
+
+# install packages to the virtual environment
+pip3 install deepTools
+
+#deactivate the environment
+source deactivate
+```
+
+To create the `spike_in` environment:
+```bash
+# create a local virtual environment
+virtualenv env/spike_in --system-site-packages
+
+# activate the virtual environment
+source env/spike_in/bin/activate
+
+# install packages to the virtual environment
+pip3 install numpy
+
+pip3 install pandas
+
+pip3 install matplotlib
+
+#deactivate the environment
+source deactivate
+```
+
+There should now be two folders, one for each environment, in the `env/` directory.
+
+**3. Download or transfer your .fastq.gz files into the `fastq/` directory.**
 
 
-**3. Align your libraries to the experimental and spike-in genomes.**
+**4. Align your libraries to the experimental and spike-in genomes.**
 
 We will submit two alignment jobs for each library: one to the experimental genome and the othe to the spike-in genome. Submitting the jobs separately allows all of the alignments to run in parallel.
 
 ```bash
 # use a for loop to submit alignments for each set of paired reads separately
-for name in fastq/*R1_001.fastq.gz; do sbatch scripts/batch_aligner.sh $name; done
-for name in fastq/*R1_001.fastq.gz; do sbatch scripts/spike_batch_aligner.sh $name; done
+for name in fastq/*R1_001.fastq.gz; do sbatch scripts/batch_aligner_new.sh $name; done
+for name in fastq/*R1_001.fastq.gz; do sbatch scripts/spike_batch_aligner_new.sh $name; done
 ```
+
+Alignment is done using [`bowtie2`](https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml) using the following options:
+- `--sensitive`
+- `--no-unal`
+- `--no-mixed`
+- `--no-discordant`
 
 This will generate two sets (experimental and spike-in) of three files for each library:
 - in `bam/`
@@ -68,10 +124,14 @@ This will generate two sets (experimental and spike-in) of three files for each 
 Also generated is a summary of each alignment in the `logs/` directory:
 - filename_bowtie2.txt
 
-We will use the 'sorted.bam' and 'sorted.bam.bai' files in subsequent steps. I don't think that the 'unsorted.bam' files need to be saved, but I have not made a habit of deleting them.
+We will use the 'sorted.bam' and 'sorted.bam.bai' files in subsequent steps. The 'unsorted.bam' files can be safely deleted.
+```bash
+rm bam/*unsorted*
+rm bam/spike_in/*unsorted*
+```
 
 
-**4. Determine the distribution of insert sizes in your MNase samples.**
+**5. Determine the distribution of insert sizes in your MNase samples.**
 
 Since the reads are paired, we can determine the size of each fragment that was sequenced from its two ends.
 
@@ -80,14 +140,14 @@ Since the reads are paired, we can determine the size of each fragment that was 
 sbatch scripts/PEFragmentSize.sh
 ```
 
-This script will look at all of the 'sorted.bam' files and will generate two new files in the `fragment_sizes/` directory:
+This script will look at all of the 'sorted.bam' files and will generate files in the `fragment_sizes/` directory:
 - a histogram showing the distribution of the insert sizes for each library
 - a CSV file with this information in tabular format. This is usually easier to interpret.
 
 These files will be generated for the experimental and spike_in alignments separately.
 
 
-**5. Count aligned reads for experimental and spike-in genomes.**
+**6. Count aligned reads for experimental and spike-in genomes.**
 
 This step uses [samtools view](http://www.htslib.org/doc/samtools-view.html) to count the number of reads in each 'sorted.bam' file. 
 - `-c` makes `samtools` output only the count and not the reads themselves
@@ -106,15 +166,12 @@ This scripts creates two files in the `logs/` directory: 'experimental_counts.lo
 The lines continue to alternate for each BAM file processed.
 
 
-**6. Do spike-in normalization math.**
+**7. Do spike-in normalization math.**
 
 For spike-in normalization, we will use the *S. pombe* reads to calculate a normalization factor.  Essentially, the normalization factor is a per-library number so that, when scaled by this factor, each library would have the same number of reads aligning to the *S. pombe* genome.
 
-At this point, we need to create a local virtual environment in which to run the custome python script that I've written to generate the normalization values.
-Run the following commands line-by-line:
-
 ```bash
-# start an interactive session
+# start an interactive session (if not already interactive)
 srun --pty -p interactive -t 0-1:00 --mem=1G bash
 
 # load modules
@@ -122,18 +179,8 @@ module load gcc/9.2.0
 
 module load python/3.10.11
 
-# create a local virtual environment
-virtualenv spike_in --system-site-packages
-
 # activate the virtual environment
-source spike_in/bin/activate
-
-# install packages to the virtual environment
-pip3 install numpy
-
-pip3 install pandas
-
-pip3 install matplotlib
+source env/spike_in/bin/activate
 
 # run the python script
 python scripts/mnase_spikein_norm.py
@@ -142,8 +189,6 @@ python scripts/mnase_spikein_norm.py
 deactivate
 ```
 
-(More on virtual environments on O2 [here](https://harvardmed.atlassian.net/wiki/spaces/O2/pages/1588662166/Personal+Python+Packages).)
-
 The output of all of this is a file called 'normalization_table.csv' in `logs/` that consists of two columns:
 - column 1 is the library name
 - column 2 is the scaling factor that will be used for normalization
@@ -151,7 +196,7 @@ The output of all of this is a file called 'normalization_table.csv' in `logs/` 
 This step also generates a plot of the proportion of each library that aligned to either the *S. pombe* or *S. cerevisiae* genome. It's called 'proportion_reads_mapped.png' and can also be found in `logs/`.
 
 
-**7. Generate coverage tracks for each library scaled by spike-in normalization.**
+**8. Generate coverage tracks for each library scaled by spike-in normalization.**
 
 ```bash
 # use a for loop to submit each coverage job in parallel
@@ -159,38 +204,53 @@ for name in bam/*_sorted.bam; do sbatch scripts/bamCoverage_spikein.sh $name; do
 ```
 
 
-**8. Calculate and plot correlation scores**
+**9. Calculate and plot correlation scores.**
 
 ```bash
-sbatch scripts/multiBigwigSummary.sh
+sbatch scripts/multiBigwigSummary_Correlation.sh
 ```
 
 This script calculates coverage scores in non-overlapping 75 bp bins genome-wide (skipping the mitochondrial genome).
 
+The binned coverage scores are used to calculate Pearson correlation coeeficients between all libraries. The results are plotted as a heatmap in the `correlation/plots` directory. It also outputs the results in tabular (.tab) format in the `correlation/tab` directory if you would like to plot it yourself. Sample code to plot for yourself in python is provided as `scripts/plot_correlation.py`.
+
+
+**10. Average biological replicates to generate coverage tracks.**
+
+If the correlation between biological replicates looks good, you can average your coverage tracks before plotting your results.
 
 ```bash
-sbatch scripts/plotCorrelation.sh
+# calculate average coverage across all replicates in 10 bp windows
+sbatch scripts/average_bigwigAverage.sh
 ```
 
-This script takes the above binned coverage scores, calculates the Pearson's and Spearman's correlation coeeficients between all libraries, and plots the results as two heatmaps in the `correlation/` directory. It also outputs the results in tabular (.tab) format in the same directory if you would like to plot it yourself.
+The averaged files (.bw) can be found in `deeptools/averaged/`. These files can be loaded by IGV to visualize nucleosome dyad coverage at individual loci.
 
+**11. Generate matrices to plot data.**
 
-**9. Generate matrices to plot data.**
-
-Using the coverage (.bw) files, generate matrices with which to plot the data. The default BED file lines 3,087 non-overlapping protein-coding genes up according to their +1 nucleosome. Plotting data is generated for 500 bp upstream and 1500 bp downstream of this position.
+Using the coverage (.bw) files, generate matrices with which to plot the data. The BED files line 3,087 non-overlapping protein-coding genes up according to their +1 nucleosome.
 
 ```bash
-# use a for loop to submit each replicate in parallel
-for rep in rep1 rep2 rep3; do sbatch scripts/computeMatrix_reference.sh $rep; done
+# Sorted by gene length. Plotting data is generated for 500 bp upstream and up to 4500 bp downstream. Positions after the end of the gene are filled with nan.
+sbatch scripts/computeMatrix_reference.sh
+
+# Sorted by Rpb1 ChIP-seq occupancy in wild-type. Plotting data is generated for 500 bp upstream and 1500 bp downstream of this position.
+sbatch scripts/computeMatrix_reference_Rpb1sorted.sh
 ```
 
-There should now be new .gz files in the `deeptools/` directory that will be used in the next step to plot the results. The uncompressed matrices are also saved in `deeptools/tab` in tab delimeted format so that you can import them into python and plot the data manually.
+There should now be new .tab files in the `deeptools/averaged/tab` directory that will be used in the next step to plot the results. The compressed matrices are also saved in `deeptools/gz` if you would like to use deeptools to generate plots.
 
-**10. Plot data.**
+**12. Import and plot data.**
 
+The .tab files can be used to plot the results in python. I do this by moving the files to my local machine, though you could certainly also try to do the plotting on O2. Sample code to plot for yourself in python is provided as `scripts/plot_mnase.py`.
+
+To transfer .tab files to your machine:
 ```bash
-# use a for loop to submit each replicate in parallel
-for rep in rep1 rep2 rep3; do sbatch scripts/makeplots.sh $rep; done
+# from a local session
+scp -r <YOUR_USER_ID>@transfer.rc.hms.harvard.edu <PATH/TO/DIR/>deeptools/averaged/tab <./PATH/TO/LOCAL/DIR>
+```
+To fix the first few lines of the files and make them python-readable, run the following code (provided as `scripts/tab_converter.sh` on the directory containing the .tab files:
+```bash
+for name in <FILE/PTAH/>*.tab; do sed '3s/genes:3087\t/#genes:\n/g' $name > lala.tab && mv lala.tab $name; done
 ```
 
-Plots are found in the `plots/` directory.  Two types of plots are generated: profile (metagenes) and heatmaps.

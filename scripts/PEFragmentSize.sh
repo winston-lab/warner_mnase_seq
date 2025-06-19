@@ -9,8 +9,13 @@
 #SBATCH --mail-type=ALL                      # ALL email notification type
 #SBATCH --mail-user=<your_email_here>          # Email to which notifications will be sent
 
-module load gcc/9.2.0 python/3.9.14 deeptools/3.5.0
+
+module load gcc/9.2.0 python/3.10.11
+
+source env/deeptools/bin/activate
 
 bamPEFragmentSize -b bam/*_sorted.bam -o fragment_sizes/PEF_histogram.png --table fragment_sizes/PEF_table.csv
 
 bamPEFragmentSize -b bam/spike_in/*_sorted.bam -o fragment_sizes/spikein_PEF_histogram.png --table fragment_sizes/spikein_PEF_table.csv
+
+deactivate
