@@ -33,13 +33,13 @@ An analysis pipeline for paired-end MNase-seq data with the following major step
 
 ```bash
 # clone the repostiory
-git clone https://github.com/jamwarner/mnase_seq.git
+git clone https://github.com/winston-lab/warner_mnase_seq.git
 
 #navigate to the newly created directory
-cd mnase_seq
+cd warner_mnase_seq
 ```
 
-Run all commands from the base `mnase_seq/` directory.
+Run all commands from the base `warner_mnase_seq/` directory.
 
 **2. Prepare virtual environments**
 
@@ -98,6 +98,8 @@ There should now be two folders, one for each environment, in the `env/` directo
 **4. Align your libraries to the experimental and spike-in genomes.**
 
 We will submit two alignment jobs for each library: one to the experimental genome and the othe to the spike-in genome. Submitting the jobs separately allows all of the alignments to run in parallel.
+
+You will have to edit the `dir` variable in `scripts/batch_aligner_new.sh` and `scripts/spike_batch_aligner_new.sh` to point towards the directory containing your fastq files.
 
 ```bash
 # use a for loop to submit alignments for each set of paired reads separately
